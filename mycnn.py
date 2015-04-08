@@ -113,7 +113,7 @@ class LeNetConvPoolLayer(object):
 
 def evaluate_lenet5(learning_rate=0.01, n_epochs=200,
                     dataset='./gender_matrix_for_cnn.data',
-                    nkerns=[500,], batch_size=100, single_image_shape=[100,200], window_heigh=2):
+                    nkerns=[500,], batch_size=100, single_image_shape=[100,100], window_heigh=2):
     """ Demonstrates lenet on MNIST dataset
 
     :type learning_rate: float
@@ -133,9 +133,14 @@ def evaluate_lenet5(learning_rate=0.01, n_epochs=200,
     :param single_image_shape: the shape of a single image shape, n*k
     """
 
+    try:
+        sentence_size=sys.argv[1]
+        single_image_shape[0]=sentence_size
+    except:
+        pass
     rng = numpy.random.RandomState(23455)
 
-    datasets = load_data(dataset)
+    datasets = load_data(dataset, single_image_shape[0]*single_image_shape[1])
 
     train_set_x, train_set_y = datasets[0]
     valid_set_x, valid_set_y = datasets[1]

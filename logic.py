@@ -51,7 +51,7 @@ class LogisticRegression(object):
         else:
             raise NotImplementedError()
 
-def load_data(dataset):
+def load_data(dataset, x_size=0):
     data_dir, data_file = os.path.split(dataset)
     if not os.path.isfile(dataset):
         print 'No such file'
@@ -72,7 +72,10 @@ def load_data(dataset):
         """
         data_x, data_y = data_xy
         #return data_x, data_y
-        data_x=data_x[:,:200*100]
+        if x_size==0:
+            pass
+        else:
+            data_x=data_x[:,:x_size]
         #data_x=data_x[:,424:624]
         shared_x = theano.shared(numpy.asarray(data_x,
                                                dtype=theano.config.floatX),
