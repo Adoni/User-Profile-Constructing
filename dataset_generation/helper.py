@@ -111,7 +111,7 @@ def get_hour(str_time):
     return str(h)
 
 def dump_vectors():
-    word_vectors=get_vectors('../global/word_vectors_400.bin')
+    word_vectors=get_vectors('../global/word_vectors.data')
     cPickle.dump(word_vectors,open('parameters.bin','wb'))
 
 def get_text_convolution(text):
@@ -382,11 +382,11 @@ def age_matrix_2_gender_matrix():
 
 if __name__=='__main__':
     print '=================Helper================='
-    #dump_vectors()
+    dump_vectors()
     #output_uids_without_age()
     #plot_age_distribute()
     #gen_emoticon_vectors()
-    output_age_matrix()
+    #output_age_matrix()
     #get_word_vectors()
     #show_data()
     #find_friend_rate()
