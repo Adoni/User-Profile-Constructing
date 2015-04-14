@@ -47,7 +47,13 @@ def parse_user(line):
     line=line[:-1].split().split('\t')
     user=dict()
     user['gender']=line[0]
-    user['gender']=line[0]
+    user['screen_name']=line[1]
+    user['statuses']=[]
+    for i in range(2,len(line)):
+        status=line[i].split(' FROM: ')
+        status={'text':status[0].split(' '), 'source':status[1]}
+        user['statuses'].append(status)
+    return user
 def output_age_matrix():
     from progressive.bar import Bar
     word_vectors=cPickle.load(open('./parameters_200.bin','rb'))
