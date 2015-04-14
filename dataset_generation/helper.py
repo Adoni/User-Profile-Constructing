@@ -1,7 +1,4 @@
 #coding:utf8
-from matplotlib import pyplot as plt
-from pymongo import Connection
-from dateutil import parser
 import urllib2
 import numpy
 import json
@@ -25,6 +22,7 @@ def is_not_good_status(status):
     return True
 
 def plot_age_distribute():
+    from matplotlib import pyplot as plt
     user_ages=get_user_ages()
     ages=[0]*5
     total=0
@@ -103,6 +101,7 @@ def get_vectors(file_name):
     return vectors
 
 def get_hour(str_time):
+    from dateutil import parser
     str_time=str_time.replace(u'日','')
     str_time=str_time.replace(u'月','-')
     str_time=str_time.replace(u'今天 ','')
@@ -122,13 +121,7 @@ def get_text_convolution(text):
 
 def output_age_matrix():
     from progressive.bar import Bar
-    #ages=get_user_ages()
-    db=Connection()
-    user_image=db.user_image
-    users=user_image.users#_age
-    #word_vectors=get_vectors('../global/word_vectors.bin')
-    #word_vectors=cPickle.load(open('./parameters_200.bin','rb'))
-    time_vectors=get_vectors('../global/time_vectors.bin')
+    word_vectors=cPickle.load(open('./parameters_200.bin','rb'))
     all_data_x=[]
     all_data_y=[]
     index=0
