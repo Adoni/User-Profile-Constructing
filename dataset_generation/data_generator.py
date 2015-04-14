@@ -20,67 +20,6 @@ def is_not_good_status(status):
     if source.endswith(u'手机'):
         return False
     return True
-
-def plot_age_distribute():
-    from matplotlib import pyplot as plt
-    user_ages=get_user_ages()
-    ages=[0]*5
-    total=0
-    db=Connection()
-    user_image=db.user_image
-    users_with_age=user_image.user_age
-    count=0
-    for user in users_with_age.find():
-        uid=user['information']['uid']
-        if len(user['statuses'])<50:
-            continue
-        age=user_ages[uid]
-        if age<5 or age>=100:
-             continue
-        count+=1
-        ages[get_age_class(age)]+=1.0
-        total+=1.0
-
-    print count
-    for i in range(0,5):
-        ages[i]/=total
-    #plt.plot(range(0,4),ages,'*-')
-    explode = (0.1, 0.1, 0.1, 0.1, 0.1)
-    colors = ['yellowgreen', 'gold', 'lightskyblue', 'lightcoral']
-    plt.pie(
-            ages,
-            labels=[
-                u'00后',
-                u'90后',
-                u'80后',
-                u'70后',
-                u'',
-                ],
-            autopct='%1.1f%%',
-            #shadow=True,
-            startangle=90,
-            explode=explode,
-            colors=colors
-            )
-    plt.grid(True)
-    plt.axis('equal')
-    plt.show()
-
-def output_uids_without_age():
-    f=open('./candidates_with_ages.data')
-    fout=open('./age_uids.data','w')
-    for l in f:
-        l=l.replace('\n','').replace('\r','')
-        try:
-            age=int(l.split('\t')[1])
-            if age>=100:
-                continue
-            if age<5:
-                continue
-            fout.write(l.split('\t')[0]+'\n')
-        except:
-            continue
-
 def get_vectors(file_name):
     print 'Getting vectors...'
     f=open(file_name)
@@ -100,46 +39,29 @@ def get_vectors(file_name):
     print 'Done'
     return vectors
 
-def get_hour(str_time):
-    from dateutil import parser
-    str_time=str_time.replace(u'日','')
-    str_time=str_time.replace(u'月','-')
-    str_time=str_time.replace(u'今天 ','')
-    t=parser.parse(str_time)
-    h=t.hour
-    return str(h)
-
 def dump_vectors():
     word_vectors=get_vectors('./word_vectors.data')
     cPickle.dump(word_vectors,open('parameters.bin','wb'))
 
-def get_text_convolution(text):
-    text_convolution=[]
-    for t in text:
-        text_convolution+=t
-    return text_convolution
-
+def parse_user(line):
+    line=line[:-1].split().split('\t')
+    user=dict()
+    user['gender']=line[0]
+    user['gender']=line[0]
 def output_age_matrix():
     from progressive.bar import Bar
     word_vectors=cPickle.load(open('./parameters_200.bin','rb'))
     all_data_x=[]
     all_data_y=[]
     index=0
-    window_size=2
-    word_vector_size=200
-    text_vector_size=window_size*word_vector_size
-    image_vector_size=word_vector_size
     #进度条相关参数
     total_count=users.count()
     bar=Bar(max_value=total_count,fallback=True)
     bar.cursor.clear_lines(2)
     bar.cursor.save()
     finish_count=0
-    for user in users.find({'got_image_descriptions':True}):
-        #age=ages[uid]
-        #根据用户年龄过滤
-        #if age>=100 or age<=5:
-        #    continue
+    for line in open('./users.data'):
+        user=parse_user(line)
         correct_status=0
         #根据合法status数量过滤
         for status in user['statuses']:
