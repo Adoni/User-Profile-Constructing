@@ -25,7 +25,7 @@ def get_vectors(file_name):
     f=open(file_name)
     vectors=dict()
     for line in f:
-        line=line.decode('utf8')
+        line=line.decode('latin1')
         line=line.split(' ')
         try:
             line.remove('\n')
@@ -41,27 +41,31 @@ def get_vectors(file_name):
 
 def dump_vectors():
     word_vectors=get_vectors('./word_vectors.data')
+    print 'dump'
     cPickle.dump(word_vectors,open('parameters.bin','wb'))
+    print 'dump done'
 
 def parse_user(line):
-    line=line[:-1].split().split('\t')
+    line=line[:-1].split('\t')
     user=dict()
     user['gender']=line[0]
     user['screen_name']=line[1]
     user['statuses']=[]
     for i in range(2,len(line)):
         status=line[i].split(' FROM: ')
-        status={'text':status[0].split(' '), 'source':status[1]}
+        status={'text':status[0].decode('utf8').split(' '), 'source':status[1].decode('utf8')}
         user['statuses'].append(status)
     return user
 def output_age_matrix():
     from progressive.bar import Bar
-    word_vectors=cPickle.load(open('./parameters_200.bin','rb'))
+    #word_vectors=cPickle.load(open('./parameters_200.bin','rb'))
+    word_vectors=get_vectors('./word_vectors.data')
+    words_count=300
     all_data_x=[]
     all_data_y=[]
     index=0
     #进度条相关参数
-    total_count=users.count()
+    total_count=20000
     bar=Bar(max_value=total_count,fallback=True)
     bar.cursor.clear_lines(2)
     bar.cursor.save()
@@ -78,17 +82,6 @@ def output_age_matrix():
         if correct_status<50:
             continue
         length=[]
-        # text_vector=[numpy.zeros(text_vector_size)]
-        # time_vector=[numpy.zeros(time_vector_size)]
-        # image_vector=[numpy.zeros(image_vector_size)]
-        # for description in user['information']['descriptions']:
-        #     for word in description:
-        #         try:
-        #             image_vector.append(word_vectors[word])
-        #         except:
-        #             continue
-        # if len(image_vector)==1:
-        #     continue
         text=[]
         for status in user['statuses']:
             if is_not_good_status(status):
@@ -97,35 +90,19 @@ def output_age_matrix():
                 try:
                     text.append(word_vectors[word])
                 except Exception as e:
+                    print e
                     continue
-            if len(text)>100:
-                continue
-            #sentence_vector=[]
-            #for word in status['text']:
-            #    try:
-            #        sentence_vector.append(list(word_vectors[word]))
-            #    except:
-            #        continue
-            #for i in range(0,len(sentence_vector)-window_size):
-            #    text.append(get_text_convolution(sentence_vector[i:i+window_size]))
-            # created_at=status['time']
-            # try:
-            #     hour=get_hour(created_at)
-            #     time_vector.append(time_vectors[hour])
-            # except Exception as e:
-            #     continue
-            #     pass
-            # length.append(len(status['text']))
-        # text_vector_mean=numpy.mean(text_vector,axis=0)
-        # if len(text)<50:
-        #     continue
-        text=text[0:100]
+            if len(text)>words_count:
+                break
+        if len(text)<words_count:
+            continue
+        text=text[0:words_count]
         text_vector=numpy.array(text)#numpy.max(text_vector,axis=0)
         #text_vector=numpy.max(text,axis=0)
         text_vector=text_vector.reshape((text_vector.shape[0]*text_vector.shape[1]))
         # time_vector=numpy.sum(time_vector,axis=0)
         #data.append(get_age_class(age))
-        if user['information']['gender']=='m':
+        if user['gender']=='m':
             all_data_y.append(1)
         else:
             all_data_y.append(0)
@@ -177,100 +154,6 @@ def gen_time_vectors():
         f.write(' '.join(v)+'\n')
     f.close()
 
-def show_data():
-    db=Connection()
-    user_image=db.user_image
-    users_with_age=user_image.user_age
-    for user in users_with_age.find(limit=10):
-        print '==============='
-        print user['information']['screen_name']
-        for status in user['statuses']:
-            print ''.join(status['text'])
-
-def get_user_ages():
-    f=open('./candidates_with_ages.data')
-    ages=dict()
-    for line in f:
-        line=line.replace('\n','').split('\t')
-        try:
-            age=int(line[1])
-            ages[line[0]]=age
-        except Exception as e:
-            print e
-            print line
-            continue
-    return ages
-
-def get_html(url):
-    try:
-        return urllib2.urlopen(url).read()
-    except Exception as e:
-        print e
-        return ''
-
-def get_all_fridend(uid):
-    base_url='https://api.weibo.com/2/friendships/friends/bilateral.json?'
-    base_url='https://api.weibo.com/2/friendships/friends.json?'
-    complete_url=base_url+'access_token='+access_token+'&uid='+str(uid)+'&count=100'
-    html=get_html(complete_url)
-    if(html=='' or 'error' in html):
-        print('error')
-        print(complete_url)
-        return None
-    html=html
-    try:
-        json_data=json.loads(html)
-    except:
-        print html
-        return None
-    return json_data['users']
-
-def check_users():
-    db=Connection()
-    user_image=db.user_image
-    users=user_image.users
-    for user in users.find():
-        print '=========='
-        print user['information']['screen_name']
-        print user['information']['verified']
-        word_count=0
-        for status in user['statuses']:
-            if is_not_good_status(status):
-                continue
-            if len(status['text'])>100:
-                continue
-            #print ''.join(status['text'])
-            word_count+=len(status['text'])
-            #print len(status['text'])
-            #print status['source']
-        print word_count
-
-def find_friend_rate():
-    ages=get_user_ages()
-    X=[]
-    Y=[]
-    i=0
-    for uid in ages:
-        i+=1
-        print i
-        if i>100:
-            break
-        age=ages[uid]
-        friends=get_all_fridend(uid)
-        if friends==None:
-            continue
-        m=0
-        f=0
-        for friend in friends:
-            if friend['gender']=='m':
-                m+=1
-            else:
-                f+=1
-        X.append(ages[uid])
-        Y.append(1.0*(m+1)/(f+1))
-    plt.scatter(X,Y)
-    plt.show()
-
 def pkl2svm():
     data=cPickle.load(open('./gender_matrix.data','rb'))
     train,valid,test=data
@@ -302,11 +185,11 @@ def age_matrix_2_gender_matrix():
 
 if __name__=='__main__':
     print '=================Helper================='
-    dump_vectors()
+    #dump_vectors()
     #output_uids_without_age()
     #plot_age_distribute()
     #gen_emoticon_vectors()
-    #output_age_matrix()
+    output_age_matrix()
     #get_word_vectors()
     #show_data()
     #find_friend_rate()
