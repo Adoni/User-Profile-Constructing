@@ -67,14 +67,14 @@ def get_text_vector_for_cnn(text,word_count):
     text_vector=numpy.array(text)#numpy.max(text_vector,axis=0)
     text_vector=text_vector.reshape((text_vector.shape[0]*text_vector.shape[1]))
     return text_vector
-def get_text_vector_for_nn(text,word_size):
+def get_text_vector_for_nn(text):
     text_vector=numpy.array(text_vector)
     text_vector=numpy.max(text_vector,axis=0)
     return text_vector
 def output_age_matrix():
     from progressive.bar import Bar
     word_vectors=get_vectors('./word_vectors2.data')
-    words_count=600
+    word_count=600
     all_data_x=[]
     all_data_y=[]
     index=0
@@ -104,7 +104,7 @@ def output_age_matrix():
                     text.append(word_vectors[word])
                 except Exception as e:
                     continue
-        text_vector=get_text_vector_for_cnn(text,word_count)
+        text_vector=get_text_vector_for_nn(text)
         if text_vector is None:
             continue
         if user['gender']=='m':
