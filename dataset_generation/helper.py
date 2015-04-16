@@ -371,10 +371,19 @@ def age_matrix_2_gender_matrix():
     test_set=(test_set[0][:,1:],test_set[0][:,:1].reshape(test_set[0].shape[0]))
     cPickle.dump((train_set,valid_set,test_set),open('gender_matrix.data','wb'))
 
-
+def change_encoding_of_word_vectors():
+    fin=open('./word_vectors.data')
+    fout=open('./word_vectors2.data','w')
+    for l in fin:
+        try:
+            l=l.decode('utf8').encode('utf8')
+            fout.write(l)
+        except:
+            print l
 if __name__=='__main__':
     print '=================Helper================='
-    dump_vectors()
+    change_encoding_of_word_vectors()
+    #dump_vectors()
     #output_uids_without_age()
     #plot_age_distribute()
     #gen_emoticon_vectors()

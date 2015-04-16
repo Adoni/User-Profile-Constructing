@@ -8,29 +8,30 @@ access_token = '2.00L9khmFlxpd6C91aec9ef010s3KCc'
 word_vector_size=500
 time_vector_size=24
 
-correct_sources=[' '.join(l.split(' ')[:-1]).decode('utf8') for l in open('./source.txt')]
+correct_sources=[' '.join(l.split(' ')[:-1]) for l in open('./source.txt')]
 def is_not_good_status(status):
     source=status['source']
     if source==None:
         return True
-    if u'O网页链接' in ''.join(status['text']):
+    if 'O网页链接' in ''.join(status['text']):
         return True
     if source in correct_sources:
         return False
-    if source.endswith(u'手机'):
+    if source.endswith('手机'):
         return False
     return True
+
 def get_vectors(file_name):
     print 'Getting vectors...'
     f=open(file_name)
     vectors=dict()
     for line in f:
-        line=line.decode('latin1')
+        line=line
         line=line.split(' ')
         try:
             line.remove('\n')
         except Exception as e:
-            print e
+            pass
         key=line[0]
         vector=[0]*(len(line)-1)
         for i in range(1,len(line)):
@@ -46,6 +47,8 @@ def dump_vectors():
     print 'dump done'
 
 def parse_user(line):
+    #print type(line)
+    #line=line.decode('utf8')
     line=line[:-1].split('\t')
     user=dict()
     user['gender']=line[0]
@@ -53,14 +56,15 @@ def parse_user(line):
     user['statuses']=[]
     for i in range(2,len(line)):
         status=line[i].split(' FROM: ')
-        status={'text':status[0].decode('utf8').split(' '), 'source':status[1].decode('utf8')}
+        status={'text':status[0].split(' '), 'source':status[1]}
         user['statuses'].append(status)
     return user
+
 def output_age_matrix():
     from progressive.bar import Bar
     #word_vectors=cPickle.load(open('./parameters_200.bin','rb'))
-    word_vectors=get_vectors('./word_vectors.data')
-    words_count=300
+    word_vectors=get_vectors('./word_vectors2.data')
+    words_count=600
     all_data_x=[]
     all_data_y=[]
     index=0
@@ -90,7 +94,9 @@ def output_age_matrix():
                 try:
                     text.append(word_vectors[word])
                 except Exception as e:
-                    print e
+                    #print type(word)
+                    #print word
+                    #print e
                     continue
             if len(text)>words_count:
                 break
@@ -128,7 +134,7 @@ def output_age_matrix():
     test_set_x=all_data_x[index*7/8:]
     test_set_y=all_data_y[index*7/8:]
     test_set=(test_set_x,test_set_y)
-    cPickle.dump((train_set,valid_set,test_set),open('gender_matrix_with_time.data','wb'))
+    cPickle.dump((train_set,valid_set,test_set),open('gender_matrix.data','wb'))
 
 def gen_emoticon_vectors():
     f=open('./emoticon_vectors.bin','w')
