@@ -67,8 +67,11 @@ def get_text_vector_for_cnn(text,word_count):
     text_vector=numpy.array(text)#numpy.max(text_vector,axis=0)
     text_vector=text_vector.reshape((text_vector.shape[0]*text_vector.shape[1]))
     return text_vector
-def get_text_vector_for_nn(text):
-    text_vector=numpy.array(text)
+def get_text_vector_for_nn(text, window_size=1):
+    text2=[]
+    for i in range(0,len(text)-window_size+1):
+        text2.append(text[i]+text[i+1])
+    text_vector=numpy.array(text2)
     text_vector=numpy.max(text_vector,axis=0)
     return text_vector
 def output_age_matrix():
@@ -104,7 +107,7 @@ def output_age_matrix():
                     text.append(word_vectors[word])
                 except Exception as e:
                     continue
-        text_vector=get_text_vector_for_nn(text)
+        text_vector=get_text_vector_for_nn(text,window_size=2)
         if text_vector is None:
             continue
         if user['gender']=='m':
