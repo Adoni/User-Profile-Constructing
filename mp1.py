@@ -173,7 +173,7 @@ class MLP(object):
 
 
 def test_mlp(learning_rate=0.01, L1_reg=0.0000, L2_reg=0.001, n_epochs=1000,
-             dataset='./gender_matrix_mp.data', batch_size=400, n_hidden=50):
+             dataset='./gender_matrix_for_nn.data', batch_size=100, n_hidden=100, n_in=100):
     """
     Demonstrate stochastic gradient descent optimization for a multilayer
     perceptron
@@ -229,7 +229,7 @@ def test_mlp(learning_rate=0.01, L1_reg=0.0000, L2_reg=0.001, n_epochs=1000,
     classifier = MLP(
         rng=rng,
         input=x,
-        n_in=400,
+        n_in=n_in,
         n_hidden=n_hidden,
         n_out=2
     )
@@ -322,6 +322,9 @@ def test_mlp(learning_rate=0.01, L1_reg=0.0000, L2_reg=0.001, n_epochs=1000,
     done_looping = False
 
     while (epoch < n_epochs) and (not done_looping):
+        learning_rate=learning_rate*(1.0-1.0*epoch/n_epochs)
+        if learning_rate<0.0001:
+            learning_rate=0.0001
         epoch = epoch + 1
         for minibatch_index in xrange(n_train_batches):
 
@@ -336,9 +339,10 @@ def test_mlp(learning_rate=0.01, L1_reg=0.0000, L2_reg=0.001, n_epochs=1000,
                 this_validation_loss = numpy.mean(validation_losses)
 
                 print(
-                    'epoch %i, minibatch %i/%i, validation error %f %%' %
+                    'epoch %i, learning_rate %f,minibatch %i/%i, validation error %f %%' %
                     (
                         epoch,
+                        learning_rate,
                         minibatch_index + 1,
                         n_train_batches,
                         this_validation_loss * 100.

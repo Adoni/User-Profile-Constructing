@@ -112,8 +112,8 @@ class LeNetConvPoolLayer(object):
 
 
 def evaluate_lenet5(learning_rate=0.01, n_epochs=200,
-                    dataset='./gender_matrix_for_cnn.data',
-                    nkerns=[500,], batch_size=100, single_image_shape=[100,100], window_heigh=2):
+                    dataset='./gender_matrix.data',
+                    nkerns=[1000,], batch_size=100, single_image_shape=[300,100], window_heigh=2):
     """ Demonstrates lenet on MNIST dataset
 
     :type learning_rate: float
@@ -200,12 +200,12 @@ def evaluate_lenet5(learning_rate=0.01, n_epochs=200,
         rng,
         input=layer2_input,
         n_in=nkerns[0] * 1 * 1,
-        n_out=200,
+        n_out=400,
         activation=T.tanh
     )
 
     # classify the values of the fully-connected sigmoidal layer
-    layer3 = LogisticRegression(input=layer2.output, n_in=200, n_out=2)
+    layer3 = LogisticRegression(input=layer2.output, n_in=400, n_out=2)
 
     # the cost we minimize during training is the NLL of the model
     cost = layer3.negative_log_likelihood(y)
@@ -282,6 +282,8 @@ def evaluate_lenet5(learning_rate=0.01, n_epochs=200,
 
     while (epoch < n_epochs) and (not done_looping):
         epoch = epoch + 1
+        if epoch>100:
+            learning_rate=0.001
         for minibatch_index in xrange(n_train_batches):
 
             iter = (epoch - 1) * n_train_batches + minibatch_index
