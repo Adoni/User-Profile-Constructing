@@ -78,7 +78,10 @@ def get_text_vector_for_nn(text, window_size=1):
 def output_age_matrix_from_bag_of_words():
     from progressive.bar import Bar
     from pymongo import Connection
-    words=[w[0:-1].decode('utf8') for w in open('./word.feature')]
+    words={}
+    f=open('./word.feature').readlines()
+    for i in range(0,len(f)):
+        words[f[i].decode('utf8')[0:-1]]=i
     all_data_x=[]
     all_data_y=[]
     index=0
@@ -108,7 +111,7 @@ def output_age_matrix_from_bag_of_words():
             for word in status['text']:
                 if word not in words:
                     continue
-                text[words.index(word)]+=1.0
+                text[words[word]]+=1.0
         if not text.any():
             continue
         text_vector=text
