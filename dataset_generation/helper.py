@@ -352,6 +352,8 @@ def pkl2svm():
     for i in range(0,y.shape[0]):
         f.write(str(int(y[i])))
         for j in range(0,600):
+            if x[i][j]==0.0 or x[i][j]==0:
+                continue
             f.write(' '+str(j)+':'+str(x[i][j]))
         f.write('\n')
     f=open('./test','w')
@@ -380,9 +382,13 @@ def change_encoding_of_word_vectors():
             fout.write(l)
         except:
             print l
+
+def normalize():
+    data=cPickle.load(open('./gender_matrix.data','rb'))
+    train,valid,test=data
 if __name__=='__main__':
     print '=================Helper================='
-    change_encoding_of_word_vectors()
+    #change_encoding_of_word_vectors()
     #dump_vectors()
     #output_uids_without_age()
     #plot_age_distribute()
@@ -394,6 +400,6 @@ if __name__=='__main__':
     #get_parameters()
     #save_vectors('../global/word_vectors.bin')
     #check_users()
-    #pkl2svm()
+    pkl2svm()
     #plot_test()
     #age_matrix_2_gender_matrix()
