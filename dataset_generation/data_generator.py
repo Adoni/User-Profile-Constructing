@@ -197,6 +197,7 @@ def output_age_matrix():
     all_data_x=numpy.array(all_data_x)
     b=numpy.max(all_data_x,axis=0)
     c=numpy.min(all_data_x,axis=0)
+    pickle.dump((b,c),open('./normal','wb'))
     for i in all_data_x.shape[1]:
         all_data_x[:,i]=(all_data_x[:,i]-c[i])/(b[i]-c[i])
     all_data_y=numpy.array(all_data_y)
@@ -213,5 +214,5 @@ def output_age_matrix():
 
 if __name__=='__main__':
     print '=================Helper================='
-    #output_age_matrix_from_bag_of_words()
-    output_age_matrix()
+    output_age_matrix_from_bag_of_words()
+    #output_age_matrix()
