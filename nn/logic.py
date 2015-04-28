@@ -102,7 +102,7 @@ def load_data(dataset, x_size=0):
 
 
 def sgd_optimization_mnist(learning_rate=0.01, n_epochs=1000,
-                           dataset='./gender_matrix_with_time_description.data',
+                           dataset='../dataset_generation/gender_matrix.data',
                            batch_size=50):
 
     datasets = load_data(dataset)
@@ -129,7 +129,7 @@ def sgd_optimization_mnist(learning_rate=0.01, n_epochs=1000,
 
     # construct the logistic regression class
     # Each MNIST image has size 28*28
-    classifier = LogisticRegression(input=x, n_in=600, n_out=2)
+    classifier = LogisticRegression(input=x, n_in=8621, n_out=2)
 
     # the cost we minimize during training is the negative log likelihood of
     # the model in symbolic format

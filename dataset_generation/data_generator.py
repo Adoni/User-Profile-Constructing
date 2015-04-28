@@ -145,12 +145,14 @@ def output_age_matrix_from_bag_of_words():
     test_set_x=all_data_x[index*7/8:]
     test_set_y=all_data_y[index*7/8:]
     test_set=(test_set_x,test_set_y)
-    cPickle.dump((train_set,valid_set,test_set),open('gender_matrix.data','wb'))
+    cPickle.dump((train_set,valid_set,test_set),open('/mnt/data1/adoni/gender_matrix.data','wb'))
 
 
 def output_age_matrix():
     from progressive.bar import Bar
-    word_vectors=get_vectors('./word_vectors2.data')
+    from pymongo import Connection
+    users=Connection().user_profilling.users
+    word_vectors=get_vectors('./word_vectors.data')
     word_count=600
     all_data_x=[]
     all_data_y=[]
@@ -161,8 +163,7 @@ def output_age_matrix():
     bar.cursor.clear_lines(2)
     bar.cursor.save()
     finish_count=0
-    for line in open('./users.data'):
-        user=parse_user(line)
+    for user in users.find():
         correct_status=0
         for status in user['statuses']:
             if is_not_good_status(status):
@@ -184,7 +185,7 @@ def output_age_matrix():
         text_vector=get_text_vector_for_nn(text,window_size=2)
         if text_vector is None:
             continue
-        if user['gender']=='m':
+        if user['information']['gender']=='m':
             all_data_y.append(1)
         else:
             all_data_y.append(0)
@@ -208,7 +209,7 @@ def output_age_matrix():
     test_set_x=all_data_x[index*7/8:]
     test_set_y=all_data_y[index*7/8:]
     test_set=(test_set_x,test_set_y)
-    cPickle.dump((train_set,valid_set,test_set),open('gender_matrix.data','wb'))
+    cPickle.dump((train_set,valid_set,test_set),open('/mnt/data1/adoni/gender_matrix.data','wb'))
 
 if __name__=='__main__':
     print '=================Helper================='
