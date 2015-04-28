@@ -2,7 +2,7 @@
 import urllib2
 import numpy
 import json
-import cPickle
+import pickle
 
 access_token = '2.00L9khmFlxpd6C91aec9ef010s3KCc'
 word_vector_size=500
@@ -43,7 +43,7 @@ def get_vectors(file_name):
 def dump_vectors():
     word_vectors=get_vectors('./word_vectors.data')
     print 'dump'
-    cPickle.dump(word_vectors,open('parameters.bin','wb'))
+    pickle.dump(word_vectors,open('parameters.bin','wb'))
     print 'dump done'
 
 def parse_user(line):
@@ -145,14 +145,14 @@ def output_age_matrix_from_bag_of_words():
     test_set_x=all_data_x[index*7/8:]
     test_set_y=all_data_y[index*7/8:]
     test_set=(test_set_x,test_set_y)
-    cPickle.dump((train_set,valid_set,test_set),open('/mnt/data1/adoni/gender_matrix.data','wb'))
+    pickle.dump((train_set,valid_set,test_set),open('/mnt/data1/adoni/gender_matrix_bag_of_words.data','wb'))
 
 
 def output_age_matrix():
     from progressive.bar import Bar
     from pymongo import Connection
     users=Connection().user_profilling.users
-    word_vectors=get_vectors('./word_vectors.data')
+    word_vectors=get_vectors('/mnt/data1/adoni/word_vectors.bin')
     word_count=600
     all_data_x=[]
     all_data_y=[]
@@ -209,8 +209,9 @@ def output_age_matrix():
     test_set_x=all_data_x[index*7/8:]
     test_set_y=all_data_y[index*7/8:]
     test_set=(test_set_x,test_set_y)
-    cPickle.dump((train_set,valid_set,test_set),open('/mnt/data1/adoni/gender_matrix.data','wb'))
+    pickle.dump((train_set,valid_set,test_set),open('/mnt/data1/adoni/gender_matrix_word_vector.data','wb'))
 
 if __name__=='__main__':
     print '=================Helper================='
-    output_age_matrix_from_bag_of_words()
+    #output_age_matrix_from_bag_of_words()
+    output_age_matrix()

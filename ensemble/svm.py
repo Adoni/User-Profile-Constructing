@@ -6,13 +6,15 @@ from sklearn.svm import LinearSVC
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.neighbors import KNeighborsClassifier
 import pickle
+import numpy
 
 def load_data(dataset):
     print '...loading data from '+dataset
     train_set, valid_set, test_set=pickle.load(open(dataset))
     train_set_x,train_set_y=train_set
+    valid_set_x,valid_set_y=valid_set
     test_set_x,test_set_y=test_set
-    data=[(train_set_x,train_set_y),(test_set_x,test_set_y)]
+    data=[(train_set_x,train_set_y),(valid_set_x,valid_set_y),(test_set_x,test_set_y)]
     return data
 
 def get_classifier(train_set, clf):
@@ -34,22 +36,53 @@ def test(clf,test_set):
 
 def main():
     data=load_data('/mnt/data1/adoni/gender_matrix.data')
+    #data=pickle.load(open('./ensemble_x','rb'))
     clfs={}
-    clfs['SVC']=SVC()
+    clfs['SVC']=SVC(probability=True)
     clfs['LogisticRegression']=LogisticRegression()
     clfs['RandomForestClassifier']=RandomForestClassifier(n_estimators=10)
     clfs['GaussianNB']=GaussianNB()
     clfs['LinearSVC']=LinearSVC()
     clfs['DecisionTreeClassifier']=DecisionTreeClassifier()
-    clfs['KNeighborsClassifier']=KNeighborsClassifier()
+    #clfs['KNeighborsClassifier']=KNeighborsClassifier()
     for clf_name in clfs:
         clf=get_classifier(data[0], clfs[clf_name])
         #clf=pickle.load(open('./clf','rb'))
         pickle.dump(clf,open(clf_name,'wb'))
-        result=test(clf,data[1])
+        result0=test(clf,data[0])
+        result1=test(clf,data[1])
         print clf
-        print result
+        print result0
+        print result1
         print '=========='
+
+def ensemble():
+    data=load_data('/mnt/data1/adoni/gender_matrix.data')
+    clfs=[]
+    clfs.append(pickle.load(open('./DecisionTreeClassifier','rb')))
+    clfs.append(pickle.load(open('./GaussianNB','rb')))
+    #clfs.append(pickle.load(open('./KNeighborsClassifier','rb')))
+    clfs.append(pickle.load(open('./LinearSVC','rb')))
+    clfs.append(pickle.load(open('./LogisticRegression','rb')))
+    clfs.append(pickle.load(open('./RandomForestClassifier','rb')))
+    #clfs.append(pickle.load(open('./SVC','rb')))
+    print '...load clfs done'
+    train_x=[]
+    train_y=data[1][1]
+    test_x=[]
+    test_y=data[2][1]
+    for clf in clfs:
+        print clf
+        predict_y=clf.predict(data[1][0])
+        train_x.append(predict_y)
+        predict_y=clf.predict(data[2][0])
+        test_x.append(predict_y)
+    train_x=numpy.array(train_x)
+    train_x=numpy.transpose(train_x)
+    test_x=numpy.array(test_x)
+    test_x=numpy.transpose(test_x)
+    pickle.dump(((train_x,train_y),(test_x,test_y)),open('ensemble','w'))
 
 if __name__=='__main__':
     main()
+    #ensemble()

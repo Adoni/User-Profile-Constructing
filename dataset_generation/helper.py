@@ -2,7 +2,7 @@
 import urllib2
 import numpy
 import json
-import cPickle
+import pickle
 
 access_token = '2.00L9khmFlxpd6C91aec9ef010s3KCc'
 word_vector_size=500
@@ -111,7 +111,7 @@ def get_hour(str_time):
 
 def dump_vectors():
     word_vectors=get_vectors('./word_vectors.data')
-    cPickle.dump(word_vectors,open('parameters.bin','wb'))
+    pickle.dump(word_vectors,open('parameters.bin','wb'))
 
 def get_text_convolution(text):
     text_convolution=[]
@@ -121,7 +121,7 @@ def get_text_convolution(text):
 
 def output_age_matrix():
     from progressive.bar import Bar
-    word_vectors=cPickle.load(open('./parameters_200.bin','rb'))
+    word_vectors=pickle.load(open('./parameters_200.bin','rb'))
     all_data_x=[]
     all_data_y=[]
     index=0
@@ -223,7 +223,7 @@ def output_age_matrix():
     test_set_x=all_data_x[index*7/8:]
     test_set_y=all_data_y[index*7/8:]
     test_set=(test_set_x,test_set_y)
-    cPickle.dump((train_set,valid_set,test_set),open('gender_matrix_with_time.data','wb'))
+    pickle.dump((train_set,valid_set,test_set),open('gender_matrix_with_time.data','wb'))
 
 def gen_emoticon_vectors():
     f=open('./emoticon_vectors.bin','w')
@@ -344,9 +344,9 @@ def find_friend_rate():
     plt.show()
 
 def pkl2svm():
-    data=cPickle.load(open('./gender_matrix.data','rb'))
+    data=pickle.load(open('/mnt/data1/adoni/gender_matrix.data','rb'))
     train,valid,test=data
-    f=open('./train','w')
+    f=open('/mnt/data1/adoni/train','w')
     x=train[0]
     y=train[1]
     for i in range(0,y.shape[0]):
@@ -356,7 +356,7 @@ def pkl2svm():
                 continue
             f.write(' '+str(j)+':'+str(x[i][j]))
         f.write('\n')
-    f=open('./test','w')
+    f=open('/mnt/data1/adoni/test','w')
     x=test[0]
     y=test[1]
     for i in range(0,y.shape[0]):
@@ -364,14 +364,6 @@ def pkl2svm():
         for j in range(0,524):
             f.write(' '+str(j)+':'+str(x[i][j]))
         f.write('\n')
-
-def age_matrix_2_gender_matrix():
-    data=cPickle.load(open('./age_matrix.data','rb'))
-    train_set,valid_set,test_set=data
-    train_set=(train_set[0][:,1:],train_set[0][:,:1].reshape(train_set[0].shape[0]))
-    valid_set=(valid_set[0][:,1:],valid_set[0][:,:1].reshape(valid_set[0].shape[0]))
-    test_set=(test_set[0][:,1:],test_set[0][:,:1].reshape(test_set[0].shape[0]))
-    cPickle.dump((train_set,valid_set,test_set),open('gender_matrix.data','wb'))
 
 def change_encoding_of_word_vectors():
     fin=open('./word_vectors.data')
@@ -383,9 +375,6 @@ def change_encoding_of_word_vectors():
         except:
             print l
 
-def normalize():
-    data=cPickle.load(open('./gender_matrix.data','rb'))
-    train,valid,test=data
 if __name__=='__main__':
     print '=================Helper================='
     #change_encoding_of_word_vectors()
