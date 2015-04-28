@@ -37,15 +37,15 @@ def main():
     clfs={}
     clfs['SVC']=SVC()
     clfs['LogisticRegression']=LogisticRegression()
-    clfs.append(RandomForestClassifier(n_estimators=10))
-    clfs.append(GaussianNB())
-    clfs.append(LinearSVC())
-    clfs.append(DecisionTreeClassifier())
-    clfs.append(KNeighborsClassifier())
-    for clf in clfs:
-        clf=get_classifier(data[0], clf)
+    clfs['RandomForestClassifier']=RandomForestClassifier(n_estimators=10)
+    clfs['GaussianNB']=GaussianNB()
+    clfs['LinearSVC']=LinearSVC()
+    clfs['DecisionTreeClassifier']=DecisionTreeClassifier()
+    clfs['KNeighborsClassifier']=KNeighborsClassifier()
+    for clf_name in clfs:
+        clf=get_classifier(data[0], clfs[clf_name])
         #clf=pickle.load(open('./clf','rb'))
-        pickle.dump(clf,open('./clf','wb'))
+        pickle.dump(clf,open(clf_name,'wb'))
         result=test(clf,data[1])
         print clf
         print result
