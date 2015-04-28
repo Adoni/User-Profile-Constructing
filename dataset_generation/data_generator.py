@@ -213,5 +213,5 @@ def output_age_matrix():
 
 if __name__=='__main__':
     print '=================Helper================='
-    output_age_matrix_from_bag_of_words()
-    #output_age_matrix()
+    #output_age_matrix_from_bag_of_words()
+    output_age_matrix()
