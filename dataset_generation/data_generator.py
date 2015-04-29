@@ -222,8 +222,6 @@ def output_name_matrix():
     finish_count=0
     y=[]
     for user in users.find():
-        if finish_count>100:
-            break
         name=user['information']['screen_name']
         corpus.append(name)
         finish_count+=1
@@ -234,7 +232,8 @@ def output_name_matrix():
         else:
             y.append(0)
     x = vectorizer.fit_transform(corpus)
-    x.toarray()
+    x=x.toarray()
+    y=numpy.array(y)
     pickle.dump((x,y),open('/mnt/data1/adoni/gender_matrix_name_bag_of_word.data','wb'))
 
 if __name__=='__main__':
