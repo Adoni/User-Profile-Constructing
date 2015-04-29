@@ -127,8 +127,7 @@ def output_age_matrix_from_bag_of_words():
     all_data_x=numpy.array(all_data_x)
     b=numpy.max(all_data_x,axis=0)
     c=numpy.min(all_data_x,axis=0)
-    print b
-    print c
+    pickle.dump((b,c),open('./normal','wb'))
     for i in range(0,all_data_x.shape[1]):
         if b[i]==c[i]:
             all_data_x[:,i]=numpy.zeros(all_data_x.shape[0])
@@ -145,7 +144,7 @@ def output_age_matrix_from_bag_of_words():
     test_set_x=all_data_x[index*7/8:]
     test_set_y=all_data_y[index*7/8:]
     test_set=(test_set_x,test_set_y)
-    pickle.dump((train_set,valid_set,test_set),open('/mnt/data1/adoni/gender_matrix_bag_of_words.data','wb'))
+    #pickle.dump((train_set,valid_set,test_set),open('/mnt/data1/adoni/gender_matrix_bag_of_words.data','wb'))
 
 
 def output_age_matrix():
@@ -197,6 +196,7 @@ def output_age_matrix():
     all_data_x=numpy.array(all_data_x)
     b=numpy.max(all_data_x,axis=0)
     c=numpy.min(all_data_x,axis=0)
+    pickle.dump((b,c),open('./normal','wb'))
     for i in all_data_x.shape[1]:
         all_data_x[:,i]=(all_data_x[:,i]-c[i])/(b[i]-c[i])
     all_data_y=numpy.array(all_data_y)
