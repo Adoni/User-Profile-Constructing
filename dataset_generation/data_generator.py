@@ -232,8 +232,18 @@ def output_name_matrix():
         else:
             y.append(0)
     x = vectorizer.fit_transform(corpus)
-    x=x.toarray()
-    y=numpy.array(y)
+    index=len(x)
+    all_data_x=x.toarray()
+    all_data_y=numpy.array(y)
+    train_set_x=all_data_x[0:index*3/4]
+    train_set_y=all_data_y[0:index*3/4]
+    train_set=(train_set_x,train_set_y)
+    valid_set_x=all_data_x[index*3/4:index*7/8]
+    valid_set_y=all_data_y[index*3/4:index*7/8]
+    valid_set=(valid_set_x,valid_set_y)
+    test_set_x=all_data_x[index*7/8:]
+    test_set_y=all_data_y[index*7/8:]
+    test_set=(test_set_x,test_set_y)
     pickle.dump((x,y),open('/mnt/data1/adoni/gender_matrix_name_bag_of_word.data','wb'))
 
 if __name__=='__main__':
