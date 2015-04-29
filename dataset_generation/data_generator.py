@@ -214,7 +214,7 @@ def output_age_matrix():
 
 def output_name_matrix():
     from sklearn.feature_extraction.text import CountVectorizer
-    vectorizer = CountVectorizer(min_df=0)
+    vectorizer = CountVectorizer(analyzer='char_wb',min_df=1,ngram_range=(1, 1))
     from pymongo import Connection
     users=Connection().user_profilling.users
     bar=get_progressive_bar(users.count())
@@ -222,8 +222,10 @@ def output_name_matrix():
     finish_count=0
     y=[]
     for user in users.find():
+        if finish_count>100:
+            break
         name=user['information']['screen_name']
-        corpus.append(' '.join(name))
+        corpus.append(name)
         finish_count+=1
         bar.cursor.restore()
         bar.draw(value=finish_count)
@@ -232,7 +234,7 @@ def output_name_matrix():
         else:
             y.append(0)
     x = vectorizer.fit_transform(corpus)
-    y.toarray()
+    x.toarray()
     pickle.dump((x,y),open('/mnt/data1/adoni/gender_matrix_name_bag_of_word.data','wb'))
 
 if __name__=='__main__':
