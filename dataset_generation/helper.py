@@ -27,8 +27,8 @@ def plot_age_distribute():
     ages=[0]*5
     total=0
     db=Connection()
-    user_image=db.user_image
-    users_with_age=user_image.user_age
+    user_profilling=db.user_profilling
+    users_with_age=user_profilling.user_age
     count=0
     for user in users_with_age.find():
         uid=user['information']['uid']
@@ -229,8 +229,8 @@ def gen_emoticon_vectors():
     f=open('./emoticon_vectors.bin','w')
     all_emoticons=[]
     db=Connection()
-    user_image=db.user_image
-    users=user_image.users
+    user_profilling=db.user_profilling
+    users=user_profilling.users
     for user in users.find():
         for status in user['statuses']:
             emoticons=status['emoticons']
@@ -251,8 +251,8 @@ def gen_time_vectors():
 
 def show_data():
     db=Connection()
-    user_image=db.user_image
-    users_with_age=user_image.user_age
+    user_profilling=db.user_profilling
+    users_with_age=user_profilling.user_age
     for user in users_with_age.find(limit=10):
         print '==============='
         print user['information']['screen_name']
@@ -299,8 +299,8 @@ def get_all_fridend(uid):
 
 def check_users():
     db=Connection()
-    user_image=db.user_image
-    users=user_image.users
+    user_profilling=db.user_profilling
+    users=user_profilling.users
     for user in users.find():
         print '=========='
         print user['information']['screen_name']
@@ -375,6 +375,13 @@ def change_encoding_of_word_vectors():
         except:
             print l
 
+def get_progressive_bar(total_count):
+    from progressive.bar import Bar
+    bar=Bar(max_value=total_count,fallback=True)
+    bar.cursor.clear_lines(2)
+    bar.cursor.save()
+    return bar
+
 if __name__=='__main__':
     print '=================Helper================='
     #change_encoding_of_word_vectors()
@@ -389,6 +396,7 @@ if __name__=='__main__':
     #get_parameters()
     #save_vectors('../global/word_vectors.bin')
     #check_users()
-    pkl2svm()
+    #pkl2svm()
     #plot_test()
     #age_matrix_2_gender_matrix()
+    test()

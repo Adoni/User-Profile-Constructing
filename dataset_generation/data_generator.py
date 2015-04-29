@@ -46,6 +46,13 @@ def dump_vectors():
     pickle.dump(word_vectors,open('parameters.bin','wb'))
     print 'dump done'
 
+def get_progressive_bar(total_count):
+    from progressive.bar import Bar
+    bar=Bar(max_value=total_count,fallback=True)
+    bar.cursor.clear_lines(2)
+    bar.cursor.save()
+    return bar
+
 def parse_user(line):
     #print type(line)
     #line=line.decode('utf8')
@@ -76,7 +83,6 @@ def get_text_vector_for_nn(text, window_size=1):
     return text_vector
 
 def output_age_matrix_from_bag_of_words():
-    from progressive.bar import Bar
     from pymongo import Connection
     words={}
     f=open('./word.feature').readlines()
@@ -88,9 +94,7 @@ def output_age_matrix_from_bag_of_words():
     #进度条相关参数
     users=Connection().user_image.users
     total_count=users.count()
-    bar=Bar(max_value=total_count,fallback=True)
-    bar.cursor.clear_lines(2)
-    bar.cursor.save()
+    bar=get_progressive_bar(total_count)
     finish_count=0
     #for line in open('./users.data'):
     for user in users.find():
@@ -148,7 +152,6 @@ def output_age_matrix_from_bag_of_words():
 
 
 def output_age_matrix():
-    from progressive.bar import Bar
     from pymongo import Connection
     users=Connection().user_profilling.users
     word_vectors=get_vectors('/mnt/data1/adoni/word_vectors.bin')
@@ -158,9 +161,7 @@ def output_age_matrix():
     index=0
     #进度条相关参数
     total_count=20000
-    bar=Bar(max_value=total_count,fallback=True)
-    bar.cursor.clear_lines(2)
-    bar.cursor.save()
+    bar=get_progressive_bar(total_count)
     finish_count=0
     for user in users.find():
         correct_status=0
@@ -211,7 +212,31 @@ def output_age_matrix():
     test_set=(test_set_x,test_set_y)
     pickle.dump((train_set,valid_set,test_set),open('/mnt/data1/adoni/gender_matrix_word_vector.data','wb'))
 
+def output_name_matrix():
+    from sklearn.feature_extraction.text import CountVectorizer
+    vectorizer = CountVectorizer(min_df=0)
+    from pymongo import Connection
+    users=Connection().user_profilling.users
+    bar=get_progressive_bar(users.count())
+    corpus=[]
+    finish_count=0
+    y=[]
+    for user in users.find():
+        name=user['information']['screen_name']
+        corpus.append(' '.join(name))
+        finish_count+=1
+        bar.cursor.restore()
+        bar.draw(value=finish_count)
+        if user['information']['gender']=='m':
+            y.append(1)
+        else:
+            y.append(0)
+    x = vectorizer.fit_transform(corpus)
+    y.toarray()
+    pickle.dump((x,y),open('/mnt/data1/adoni/gender_matrix_name_bag_of_word.data','wb'))
+
 if __name__=='__main__':
     print '=================Helper================='
     #output_age_matrix_from_bag_of_words()
-    output_age_matrix()
+    #output_age_matrix()
+    output_name_matrix()
