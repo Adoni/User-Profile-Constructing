@@ -382,6 +382,47 @@ def get_progressive_bar(total_count):
     bar.cursor.save()
     return bar
 
+def feature_selection_df(corpus):
+    c=dict()
+    print '...counting'
+    for w in corpus:
+        try:
+            c[w]+=1
+        except:
+            c[w]=1
+    print '...sorting dictionary'
+    names=sorted(c.iteritems(), key=lambda d:d[1], reverse = True)
+    f=open('./name.featur','w')
+    for name in names:
+        f.write(name[0].encode('utf8')+':'+str(name[1])+'\n')
+
+def generate_name_feature():
+    from pymongo import Connection
+    lastnames=[name.replace('\n','').decode('utf8') for name in open('./lastname')]
+    from pymongo import Connection
+    users=Connection().user_profilling.users
+    bar=get_progressive_bar(users.count())
+    corpus=[]
+    finish_count=0
+    y=[]
+    for user in users.find():
+        name=user['screen_name']
+        normal_name=''
+        for n in name:
+            if n[0] in lastnames:
+                normal_name=n
+            else:
+                continue
+        if normal_name=='':
+            continue
+        if len(normal_name)<2:
+            continue
+        corpus.append(normal_name[1:])
+        finish_count+=1
+        bar.cursor.restore()
+        bar.draw(value=finish_count)
+    feature_selection_df(corpus)
+
 if __name__=='__main__':
     print '=================Helper================='
     #change_encoding_of_word_vectors()
@@ -399,4 +440,4 @@ if __name__=='__main__':
     #pkl2svm()
     #plot_test()
     #age_matrix_2_gender_matrix()
-    test()
+    generate_name_feature()

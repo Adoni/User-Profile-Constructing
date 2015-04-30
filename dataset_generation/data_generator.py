@@ -302,7 +302,7 @@ def output_name_matrix():
             continue
         if len(normal_name)<2:
             continue
-        corpus.append(normal_name[1:-1])
+        corpus.append(normal_name[1:])
         finish_count+=1
         bar.cursor.restore()
         bar.draw(value=finish_count)
