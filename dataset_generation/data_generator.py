@@ -280,6 +280,7 @@ def output_description_matrix():
 
 def output_name_matrix():
     from sklearn.feature_extraction.text import CountVectorizer
+    lastnames=[name.replace('\n','').decode('utf8') for name in open('./lastname')]
     vectorizer = CountVectorizer(analyzer='char_wb',ngram_range=(1,3),min_df=1)
     from pymongo import Connection
     users=Connection().user_profilling.users
@@ -288,7 +289,16 @@ def output_name_matrix():
     finish_count=0
     y=[]
     for user in users.find():
-        corpus.append(user['information']['screen_name'])
+        name=user['screen_name']
+        normal_name=''
+        for n in name:
+            if n[0] in lastnames:
+                normal_name=n
+        if normal_name=='':
+            continue
+        if len(normal_name)<2:
+            continue
+        corpus.append(normal_name[1:-1])
         finish_count+=1
         bar.cursor.restore()
         bar.draw(value=finish_count)
