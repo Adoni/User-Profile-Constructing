@@ -220,6 +220,7 @@ def get_str_description(description):
     return d
 
 def dump_train_valid_test(x,y,file_name):
+    print 'dump'
     if not len(x)==len(y):
         raise Exception('The size of x is not equel with that of y')
     all_data_x=[]
@@ -231,14 +232,14 @@ def dump_train_valid_test(x,y,file_name):
     all_data_x=numpy.array(all_data_x)
     all_data_y=numpy.array(all_data_y)
     print all_data_x.shape
-    b=numpy.max(all_data_x,axis=0)
-    c=numpy.min(all_data_x,axis=0)
-    pickle.dump((b,c),open('./normal','wb'))
-    for i in range(0,all_data_x.shape[1]):
-        if b[i]==c[i]:
-            all_data_x[i]=0
-        else:
-            all_data_x[:,i]=(all_data_x[:,i]-c[i])/(b[i]-c[i])
+    #b=numpy.max(all_data_x,axis=0)
+    #c=numpy.min(all_data_x,axis=0)
+    #pickle.dump((b,c),open('./normal','wb'))
+    #for i in range(0,all_data_x.shape[1]):
+    #    if b[i]==c[i]:
+    #        all_data_x[i]=0
+    #    else:
+    #        all_data_x[:,i]=(all_data_x[:,i]-c[i])/(b[i]-c[i])
     index=len(y)
     train_set_x=all_data_x[0:index*3/4]
     train_set_y=all_data_y[0:index*3/4]
@@ -279,7 +280,7 @@ def output_description_matrix():
 
 def output_name_matrix():
     from sklearn.feature_extraction.text import CountVectorizer
-    vectorizer = CountVectorizer(min_df=1)
+    vectorizer = CountVectorizer(analyzer='char_wb',ngram_range=(1,3),min_df=1)
     from pymongo import Connection
     users=Connection().user_profilling.users
     bar=get_progressive_bar(users.count())
@@ -287,7 +288,7 @@ def output_name_matrix():
     finish_count=0
     y=[]
     for user in users.find():
-        corpus.append(' '.join(user['screen_name']))
+        corpus.append(user['information']['screen_name'])
         finish_count+=1
         bar.cursor.restore()
         bar.draw(value=finish_count)

@@ -10,7 +10,9 @@ import numpy
 
 def load_data(dataset):
     print '...loading data from '+dataset
-    train_set, valid_set, test_set=pickle.load(open(dataset))
+    a=pickle.load(open(dataset,'rb'))
+    print len(a)
+    train_set, valid_set, test_set=pickle.load(open(dataset,'rb'))
     train_set_x,train_set_y=train_set
     valid_set_x,valid_set_y=valid_set
     test_set_x,test_set_y=test_set
@@ -35,7 +37,7 @@ def test(clf,test_set):
     return true*1.0/(true+false)
 
 def main():
-    data=load_data('/mnt/data1/adoni/gender_matrix.data')
+    data=load_data('/mnt/data1/adoni/gender_name.data')
     #data=pickle.load(open('./ensemble_x','rb'))
     clfs={}
     clfs['SVC']=SVC(probability=True)
@@ -48,16 +50,15 @@ def main():
     for clf_name in clfs:
         clf=get_classifier(data[0], clfs[clf_name])
         #clf=pickle.load(open('./clf','rb'))
-        pickle.dump(clf,open(clf_name,'wb'))
+        pickle.dump(clf,open('./models/name_'+clf_name+'.model','wb'))
         result0=test(clf,data[0])
         result1=test(clf,data[1])
-        print clf
-        print result0
+        print clf_name
         print result1
         print '=========='
 
 def ensemble():
-    data=load_data('/mnt/data1/adoni/gender_matrix.data')
+    data=load_data('/mnt/data1/adoni/gender_matrix_name_bag_of_word.data')
     clfs=[]
     clfs.append(pickle.load(open('./DecisionTreeClassifier','rb')))
     clfs.append(pickle.load(open('./GaussianNB','rb')))
