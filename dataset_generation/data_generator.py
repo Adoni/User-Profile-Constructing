@@ -229,18 +229,20 @@ def dump_train_valid_test(x,y,file_name):
         if numpy.any(x[i]):
             all_data_x.append(x[i])
             all_data_y.append(y[i])
+    if not len(all_data_x)==len(all_data_y):
+        raise Exception('The size of x is not equel with that of y')
     all_data_x=numpy.array(all_data_x)
     all_data_y=numpy.array(all_data_y)
     print all_data_x.shape
-    #b=numpy.max(all_data_x,axis=0)
-    #c=numpy.min(all_data_x,axis=0)
-    #pickle.dump((b,c),open('./normal','wb'))
-    #for i in range(0,all_data_x.shape[1]):
-    #    if b[i]==c[i]:
-    #        all_data_x[i]=0
-    #    else:
-    #        all_data_x[:,i]=(all_data_x[:,i]-c[i])/(b[i]-c[i])
-    index=len(y)
+    b=numpy.max(all_data_x,axis=0)
+    c=numpy.min(all_data_x,axis=0)
+    pickle.dump((b,c),open('./normal','wb'))
+    for i in range(0,all_data_x.shape[1]):
+        if b[i]==c[i]:
+            all_data_x[i]=0
+        else:
+            all_data_x[:,i]=(all_data_x[:,i]-c[i])/(b[i]-c[i])
+    index=len(all_data_y)
     train_set_x=all_data_x[0:index*3/4]
     train_set_y=all_data_y[0:index*3/4]
     train_set=(train_set_x,train_set_y)
@@ -289,6 +291,8 @@ def output_name_matrix():
     finish_count=0
     y=[]
     for user in users.find():
+        if finish_count>1000:
+            break
         name=user['screen_name']
         normal_name=''
         for n in name:
@@ -307,6 +311,10 @@ def output_name_matrix():
         else:
             y.append(0)
     x = vectorizer.fit_transform(corpus)
+    fe=vectorizer.get_feature_names()
+    for f in fe:
+        print f.encode('utf8')
+    return
     all_data_x=x.toarray()
     all_data_y=numpy.array(y)
     dump_train_valid_test(all_data_x,all_data_y,'gender_name.data')
