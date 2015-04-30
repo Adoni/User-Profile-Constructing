@@ -148,8 +148,7 @@ def output_age_matrix_from_bag_of_words():
     test_set_x=all_data_x[index*7/8:]
     test_set_y=all_data_y[index*7/8:]
     test_set=(test_set_x,test_set_y)
-    #pickle.dump((train_set,valid_set,test_set),open('/mnt/data1/adoni/gender_matrix_bag_of_words.data','wb'))
-
+    pickle.dump((train_set,valid_set,test_set),open('/mnt/data1/adoni/gender_matrix_bag_of_words.data','wb'))
 
 def output_age_matrix():
     from pymongo import Connection
@@ -212,29 +211,35 @@ def output_age_matrix():
     test_set=(test_set_x,test_set_y)
     pickle.dump((train_set,valid_set,test_set),open('/mnt/data1/adoni/gender_matrix_word_vector.data','wb'))
 
-def output_name_matrix():
-    from sklearn.feature_extraction.text import CountVectorizer
-    vectorizer = CountVectorizer(analyzer='char_wb',min_df=1,ngram_range=(1, 1))
-    from pymongo import Connection
-    users=Connection().user_profilling.users
-    bar=get_progressive_bar(users.count())
-    corpus=[]
-    finish_count=0
-    y=[]
-    for user in users.find():
-        name=user['information']['screen_name']
-        corpus.append(name)
-        finish_count+=1
-        bar.cursor.restore()
-        bar.draw(value=finish_count)
-        if user['information']['gender']=='m':
-            y.append(1)
+def get_str_description(description):
+    d=[]
+    for dd in description:
+        #d=d+dd
+        d.append(''.join(dd))
+    d=' '.join(d)
+    return d
+
+def dump_train_valid_test(x,y,file_name):
+    if not len(x)==len(y):
+        raise Exception('The size of x is not equel with that of y')
+    all_data_x=[]
+    all_data_y=[]
+    for i in range(0,len(x)):
+        if numpy.any(x[i]):
+            all_data_x.append(x[i])
+            all_data_y.append(y[i])
+    all_data_x=numpy.array(all_data_x)
+    all_data_y=numpy.array(all_data_y)
+    print all_data_x.shape
+    b=numpy.max(all_data_x,axis=0)
+    c=numpy.min(all_data_x,axis=0)
+    pickle.dump((b,c),open('./normal','wb'))
+    for i in range(0,all_data_x.shape[1]):
+        if b[i]==c[i]:
+            all_data_x[i]=0
         else:
-            y.append(0)
-    x = vectorizer.fit_transform(corpus)
-    index=len(x)
-    all_data_x=x.toarray()
-    all_data_y=numpy.array(y)
+            all_data_x[:,i]=(all_data_x[:,i]-c[i])/(b[i]-c[i])
+    index=len(y)
     train_set_x=all_data_x[0:index*3/4]
     train_set_y=all_data_y[0:index*3/4]
     train_set=(train_set_x,train_set_y)
@@ -244,10 +249,60 @@ def output_name_matrix():
     test_set_x=all_data_x[index*7/8:]
     test_set_y=all_data_y[index*7/8:]
     test_set=(test_set_x,test_set_y)
-    pickle.dump((x,y),open('/mnt/data1/adoni/gender_matrix_name_bag_of_word.data','wb'))
+    pickle.dump((train_set,valid_set,test_set),open('/mnt/data1/adoni/'+file_name,'wb'))
+
+def output_description_matrix():
+    from sklearn.feature_extraction.text import CountVectorizer
+    vectorizer = CountVectorizer(min_df=1)
+    from pymongo import Connection
+    users=Connection().user_profilling.users
+    bar=get_progressive_bar(users.count())
+    corpus=[]
+    finish_count=0
+    y=[]
+    for user in users.find():
+        if 'descriptions' not in user['information']:
+            continue
+        description=user['information']['descriptions']
+        corpus.append(get_str_description(description))
+        finish_count+=1
+        bar.cursor.restore()
+        bar.draw(value=finish_count)
+        if user['information']['gender']=='m':
+            y.append(1)
+        else:
+            y.append(0)
+    x = vectorizer.fit_transform(corpus)
+    all_data_x=x.toarray()
+    all_data_y=numpy.array(y)
+    dump_train_valid_test(all_data_x,all_data_y,'gender_description.data')
+
+def output_name_matrix():
+    from sklearn.feature_extraction.text import CountVectorizer
+    vectorizer = CountVectorizer(min_df=1)
+    from pymongo import Connection
+    users=Connection().user_profilling.users
+    bar=get_progressive_bar(users.count())
+    corpus=[]
+    finish_count=0
+    y=[]
+    for user in users.find():
+        corpus.append(' '.join(user['screen_name']))
+        finish_count+=1
+        bar.cursor.restore()
+        bar.draw(value=finish_count)
+        if user['information']['gender']=='m':
+            y.append(1)
+        else:
+            y.append(0)
+    x = vectorizer.fit_transform(corpus)
+    all_data_x=x.toarray()
+    all_data_y=numpy.array(y)
+    dump_train_valid_test(all_data_x,all_data_y,'gender_name.data')
 
 if __name__=='__main__':
     print '=================Helper================='
     #output_age_matrix_from_bag_of_words()
     #output_age_matrix()
+    #output_description_matrix()
     output_name_matrix()
