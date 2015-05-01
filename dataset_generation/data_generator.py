@@ -291,18 +291,17 @@ def output_name_matrix():
     finish_count=0
     y=[]
     for user in users.find():
-        if finish_count>1000:
-            break
+        #if finish_count>1000:
+        #    break
         name=user['screen_name']
-        normal_name=''
+        normal_name=[]
         for n in name:
             if n[0] in lastnames:
-                normal_name=n
-        if normal_name=='':
-            continue
-        if len(normal_name)<2:
-            continue
-        corpus.append(normal_name[1:])
+                normal_name.append(n[1:])
+            else:
+                continue
+                #normal_name.append(n)
+        corpus.append(' '.join(normal_name))
         finish_count+=1
         bar.cursor.restore()
         bar.draw(value=finish_count)
@@ -314,7 +313,6 @@ def output_name_matrix():
     fe=vectorizer.get_feature_names()
     for f in fe:
         print f.encode('utf8')
-    return
     all_data_x=x.toarray()
     all_data_y=numpy.array(y)
     dump_train_valid_test(all_data_x,all_data_y,'gender_name.data')
