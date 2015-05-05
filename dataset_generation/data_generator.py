@@ -317,9 +317,42 @@ def output_name_matrix():
     all_data_y=numpy.array(y)
     dump_train_valid_test(all_data_x,all_data_y,'gender_name.data')
 
+
+def output_name_matrix_of_two_words():
+    from bayesen import get_tf
+    from helper import get_progressive_bar
+    from pymongo import Connection
+    users=Connection().user_profilling.users
+    lastnames=[name.replace('\n','').decode('utf8') for name in open('./lastname')]
+    bar=get_progressive_bar(users.count())
+    finish_count=0
+    tf=pickle.load(open('./tf.data'))
+    for user in users.find():
+        name=user['screen_name']
+        finish_count+=1
+        if finish_count>5000:
+            break
+        for n in name:
+            if n[0] not in lastnames or len(n)>3 and len(n)<3:
+                continue
+            try:
+                x=1.0*tf[n[1]][0]/sum(tf[n[1]])
+                y=1.0*tf[n[2]][0]/sum(tf[n[2]])
+            except:
+                continue
+            if user['information']['gender']=='m':
+                x_m.append(x)
+                y_m.append(y)
+            else:
+                x_f.append(x)
+                y_f.append(y)
+        bar.cursor.restore()
+        bar.draw(value=finish_count)
+
 if __name__=='__main__':
     print '=================Helper================='
     #output_age_matrix_from_bag_of_words()
     #output_age_matrix()
     #output_description_matrix()
-    output_name_matrix()
+    #output_name_matrix()
+    output_name_matrix_of_two_words()

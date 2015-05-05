@@ -28,7 +28,7 @@ def get_tf():
     return tf
 
 
-def test():
+def plot():
     from matplotlib import pyplot as plt
     x_m=[]
     y_m=[]
@@ -68,4 +68,4 @@ def test():
 
 
 if __name__=='__main__':
-    test()
+    plot()
