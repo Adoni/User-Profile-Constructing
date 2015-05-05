@@ -62,8 +62,10 @@ def plot():
                 y_f.append(y)
         bar.cursor.restore()
         bar.draw(value=finish_count)
-    plt.plot(x_m,y_m,'r*')
-    plt.plot(x_f,y_f,'g.')
+    plt.scatter(x_m,y_m,c='red', label='Male',  alpha=0.3)
+    plt.scatter(x_f,y_f,c='green', label='Female',  alpha=0.3)
+    plt.legend()
+    plt.grid(True)
     plt.show()
 
 

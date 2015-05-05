@@ -327,6 +327,8 @@ def output_name_matrix_of_two_words():
     bar=get_progressive_bar(users.count())
     finish_count=0
     tf=pickle.load(open('./tf.data'))
+    x=[]
+    y=[]
     for user in users.find():
         name=user['screen_name']
         finish_count+=1
@@ -336,18 +338,18 @@ def output_name_matrix_of_two_words():
             if n[0] not in lastnames or len(n)>3 and len(n)<3:
                 continue
             try:
-                x=1.0*tf[n[1]][0]/sum(tf[n[1]])
-                y=1.0*tf[n[2]][0]/sum(tf[n[2]])
+                x0=1.0*tf[n[1]][0]/sum(tf[n[1]])
+                x1=1.0*tf[n[2]][0]/sum(tf[n[2]])
             except:
                 continue
             if user['information']['gender']=='m':
-                x_m.append(x)
-                y_m.append(y)
+                y.append(1)
             else:
-                x_f.append(x)
-                y_f.append(y)
+                y.append(0)
+            x.append([x0,x1])
         bar.cursor.restore()
         bar.draw(value=finish_count)
+    dump_train_valid_test(x,y,'gender_name_simple')
 
 if __name__=='__main__':
     print '=================Helper================='
