@@ -233,7 +233,6 @@ def dump_train_valid_test(x,y,file_name):
         raise Exception('The size of x is not equel with that of y')
     all_data_x=numpy.array(all_data_x)
     all_data_y=numpy.array(all_data_y)
-    print all_data_x.shape
     b=numpy.max(all_data_x,axis=0)
     c=numpy.min(all_data_x,axis=0)
     pickle.dump((b,c),open('./normal','wb'))
@@ -243,6 +242,7 @@ def dump_train_valid_test(x,y,file_name):
         else:
             all_data_x[:,i]=(all_data_x[:,i]-c[i])/(b[i]-c[i])
     index=len(all_data_y)
+    print index
     train_set_x=all_data_x[0:index*3/4]
     train_set_y=all_data_y[0:index*3/4]
     train_set=(train_set_x,train_set_y)
@@ -319,7 +319,6 @@ def output_name_matrix():
 
 
 def output_name_matrix_of_two_words():
-    from bayesen import get_tf
     from helper import get_progressive_bar
     from pymongo import Connection
     users=Connection().user_profilling.users
@@ -349,7 +348,34 @@ def output_name_matrix_of_two_words():
             x.append([x0,x1])
         bar.cursor.restore()
         bar.draw(value=finish_count)
-    dump_train_valid_test(x,y,'gender_name_simple')
+    dump_train_valid_test(x,y,'gender_name_simple.data')
+
+
+def output_graph_matrix():
+    from pymongo import Connection
+    users=Connection().user_profilling.users
+    graph=Connection().user_profilling.graph_embedding
+    print graph.count()
+    bar=get_progressive_bar(users.count())
+    x=[]
+    y=[]
+    finish_count=0
+    for user in users.find({'int_id':{'$exists':True}},{'information':1,'int_id':1}):
+        finish_count+=1
+        print finish_count
+        #bar.cursor.restore()
+        #bar.draw(value=finish_count)
+        user_embedding=graph.find_one({'_id':user['int_id']})
+        if user_embedding is None:
+            print user_embedding
+            continue
+        gender=user['information']['gender']
+        if gender=='f':
+            y.append(0)
+        else:
+            y.append(1)
+        x.append(user_embedding['embedding'])
+    dump_train_valid_test(x,y,'gender_graph.data')
 
 if __name__=='__main__':
     print '=================Helper================='
@@ -357,4 +383,5 @@ if __name__=='__main__':
     #output_age_matrix()
     #output_description_matrix()
     #output_name_matrix()
-    output_name_matrix_of_two_words()
+    #output_name_matrix_of_two_words()
+    output_graph_matrix()
