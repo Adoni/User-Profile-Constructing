@@ -37,7 +37,7 @@ def test(clf,test_set):
     return true*1.0/(true+false)
 
 def main():
-    data=load_data('/mnt/data1/adoni/gender_name.data')
+    data=load_data('/mnt/data1/adoni/gender_joint.data')
     #data=pickle.load(open('./ensemble_x','rb'))
     clfs={}
     clfs['SVC']=SVC(probability=True)

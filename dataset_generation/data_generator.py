@@ -105,6 +105,7 @@ def dump_user_vector(x,y,uids,file_name):
 
 def dump_train_valid_test(x,y,file_name):
     print 'dump'
+    print len(x[0])
     if not len(x)==len(y):
         raise Exception('The size of x is not equel with that of y')
     all_data_x=[]
@@ -148,11 +149,12 @@ def output_text_matrix_from_bag_of_words():
     all_data_y=[]
     index=0
     #进度条相关参数
-    users=Connection().user_image.users
+    users=Connection().user_profilling.users
     total_count=users.count()
     bar=get_progressive_bar(total_count)
     finish_count=0
     #for line in open('./users.data'):
+    uids=[]
     for user in users.find():
         #user=parse_user(line)
         correct_status=0
@@ -180,13 +182,15 @@ def output_text_matrix_from_bag_of_words():
         else:
             all_data_y.append(0)
         all_data_x.append(text_vector)
+        uids.append(user['information']['uid'])
         index+=1
         finish_count+=1
         bar.cursor.restore()
         bar.draw(value=finish_count)
     all_data_x=numpy.array(all_data_x)
     all_data_y=numpy.array(all_data_y)
-    dump_train_valid_test(all_data_x,all_data_y,'gender_text_bag_of_words.data')
+    #dump_train_valid_test(all_data_x,all_data_y,'gender_text_bag_of_words.data')
+    dump_user_vector(all_data_x,all_data_y,uids,'user_text_bag_words.data')
 
 def output_text_matrix_from_vector():
     from pymongo import Connection
@@ -235,7 +239,7 @@ def output_text_matrix_from_vector():
         bar.draw(value=finish_count)
     all_data_x=numpy.array(all_data_x)
     all_data_y=numpy.array(all_data_y)
-    dump_train_valid_test(all_data_x,all_data_y,'gender_text_vector.data')
+    #dump_train_valid_test(all_data_x,all_data_y,'gender_text_vector.data')
     dump_user_vector(all_data_x,all_data_y,uids,'user_text_vectors.data')
 
 def output_description_matrix():
@@ -273,6 +277,7 @@ def output_name_matrix():
     bar=get_progressive_bar(users.count())
     corpus=[]
     finish_count=0
+    uids=[]
     y=[]
     for user in users.find():
         #if finish_count>1000:
@@ -293,13 +298,15 @@ def output_name_matrix():
             y.append(1)
         else:
             y.append(0)
+        uids.append(user['information']['uid'])
     x = vectorizer.fit_transform(corpus)
     fe=vectorizer.get_feature_names()
     for f in fe:
         print f.encode('utf8')
     all_data_x=x.toarray()
     all_data_y=numpy.array(y)
-    dump_train_valid_test(all_data_x,all_data_y,'gender_name.data')
+    #dump_train_valid_test(all_data_x,all_data_y,'gender_name.data')
+    dump_user_vector(all_data_x,all_data_y,uids,'user_name_vector.data')
 
 def output_name_matrix_of_two_words():
     from helper import get_progressive_bar
@@ -367,14 +374,24 @@ def merge_different_vectors(vector_file_names):
     vectors=[]
     for file_name in vector_file_names:
         vectors.append(pickle.load(open('/mnt/data1/adoni/'+file_name+'.data','rb')))
-    x=[]
-    y=[]
+    all_data_x=[]
+    all_data_y=[]
     uids=set(vectors[0].keys())
     for v in vectors:
         uids=uids&set(v.keys())
+    for uid in uids:
+        x=[]
+        for v in vectors:
+            x+=list(v[uid][0])
+        y=v[uid][1]
+        all_data_x.append(x)
+        all_data_y.append(y)
+    dump_train_valid_test(all_data_x,all_data_y,'gender_joint.data')
 
 if __name__=='__main__':
     print '=================Helper================='
     #output_graph_matrix()
     #output_text_matrix_from_vector()
-    merge_different_vectors(['user_graph_vector'])
+    #output_name_matrix()
+    #output_text_matrix_from_bag_of_words()
+    merge_different_vectors(['user_graph_vector','user_text_vectors','user_text_bag_words'])

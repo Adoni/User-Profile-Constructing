@@ -173,7 +173,7 @@ class MLP(object):
 
 
 def test_mlp(learning_rate=0.01, L1_reg=0.0000, L2_reg=0.001, n_epochs=1000,
-             dataset='../dataset_generation/gender_matrix.data', batch_size=100, n_hidden=500, n_in=8621):
+             dataset='/mnt/data1/adoni/gender_joint.data', batch_size=100, n_hidden=500, n_in=9077):
     """
     Demonstrate stochastic gradient descent optimization for a multilayer
     perceptron
