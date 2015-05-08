@@ -363,7 +363,18 @@ def output_graph_matrix():
     #dump_train_valid_test(x,y,'gender_graph.data')
     dump_user_vector(x,y,uids,'user_graph_vector.data')
 
+def merge_different_vectors(vector_file_names):
+    vectors=[]
+    for file_name in vector_file_names:
+        vectors.append(pickle.load(open('/mnt/data1/adoni/'+file_name+'.data','rb')))
+    x=[]
+    y=[]
+    uids=set(vectors[0].keys())
+    for v in vectors:
+        uids=uids&set(v.keys())
+
 if __name__=='__main__':
     print '=================Helper================='
     #output_graph_matrix()
-    output_text_matrix_from_vector()
+    #output_text_matrix_from_vector()
+    merge_different_vectors(['user_graph_vector'])
