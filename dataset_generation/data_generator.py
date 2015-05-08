@@ -75,6 +75,8 @@ def get_text_vector_for_cnn(text,word_count):
     text_vector=text_vector.reshape((text_vector.shape[0]*text_vector.shape[1]))
     return text_vector
 def get_text_vector_for_nn(text, window_size=1):
+    if len(text)<window_size:
+        return None
     text2=[]
     for i in range(0,len(text)-window_size+1):
         text2.append(text[i]+text[i+1])
@@ -82,7 +84,61 @@ def get_text_vector_for_nn(text, window_size=1):
     text_vector=numpy.max(text_vector,axis=0)
     return text_vector
 
-def output_age_matrix_from_bag_of_words():
+
+def get_str_description(description):
+    d=[]
+    for dd in description:
+        #d=d+dd
+        d.append(''.join(dd))
+    d=' '.join(d)
+    return d
+
+def dump_user_vector(x,y,uids,file_name):
+    user_vector=dict()
+    if not len(x)==len(y):
+        raise Exception('x not equal with y')
+    if not len(x)==len(uids):
+        raise Exception('x not equal with uids')
+    for i in range(0,len(x)):
+        user_vector[uids[i]]=[x[i],y[i]]
+    pickle.dump(user_vector,open('/mnt/data1/adoni/'+file_name,'wb'))
+
+def dump_train_valid_test(x,y,file_name):
+    print 'dump'
+    if not len(x)==len(y):
+        raise Exception('The size of x is not equel with that of y')
+    all_data_x=[]
+    all_data_y=[]
+    for i in range(0,len(x)):
+        if numpy.any(x[i]):
+            all_data_x.append(x[i])
+            all_data_y.append(y[i])
+    if not len(all_data_x)==len(all_data_y):
+        raise Exception('The size of x is not equel with that of y')
+    all_data_x=numpy.array(all_data_x)
+    all_data_y=numpy.array(all_data_y)
+    b=numpy.max(all_data_x,axis=0)
+    c=numpy.min(all_data_x,axis=0)
+    pickle.dump((b,c),open('./normal','wb'))
+    for i in range(0,all_data_x.shape[1]):
+        if b[i]==c[i]:
+            all_data_x[i]=0
+        else:
+            all_data_x[:,i]=(all_data_x[:,i]-c[i])/(b[i]-c[i])
+    index=len(all_data_y)
+    print index
+    train_set_x=all_data_x[0:index*3/4]
+    train_set_y=all_data_y[0:index*3/4]
+    train_set=(train_set_x,train_set_y)
+    valid_set_x=all_data_x[index*3/4:index*7/8]
+    valid_set_y=all_data_y[index*3/4:index*7/8]
+    valid_set=(valid_set_x,valid_set_y)
+    test_set_x=all_data_x[index*7/8:]
+    test_set_y=all_data_y[index*7/8:]
+    test_set=(test_set_x,test_set_y)
+    pickle.dump((train_set,valid_set,test_set),open('/mnt/data1/adoni/'+file_name,'wb'))
+
+def output_text_matrix_from_bag_of_words():
     from pymongo import Connection
     words={}
     f=open('./word.feature').readlines()
@@ -129,28 +185,10 @@ def output_age_matrix_from_bag_of_words():
         bar.cursor.restore()
         bar.draw(value=finish_count)
     all_data_x=numpy.array(all_data_x)
-    b=numpy.max(all_data_x,axis=0)
-    c=numpy.min(all_data_x,axis=0)
-    pickle.dump((b,c),open('./normal','wb'))
-    for i in range(0,all_data_x.shape[1]):
-        if b[i]==c[i]:
-            all_data_x[:,i]=numpy.zeros(all_data_x.shape[0])
-            continue
-        all_data_x[:,i]=(all_data_x[:,i]-c[i])/(b[i]-c[i])
     all_data_y=numpy.array(all_data_y)
-    all_data_y=numpy.array(all_data_y)
-    train_set_x=all_data_x[0:index*3/4]
-    train_set_y=all_data_y[0:index*3/4]
-    train_set=(train_set_x,train_set_y)
-    valid_set_x=all_data_x[index*3/4:index*7/8]
-    valid_set_y=all_data_y[index*3/4:index*7/8]
-    valid_set=(valid_set_x,valid_set_y)
-    test_set_x=all_data_x[index*7/8:]
-    test_set_y=all_data_y[index*7/8:]
-    test_set=(test_set_x,test_set_y)
-    pickle.dump((train_set,valid_set,test_set),open('/mnt/data1/adoni/gender_matrix_bag_of_words.data','wb'))
+    dump_train_valid_test(all_data_x,all_data_y,'gender_text_bag_of_words.data')
 
-def output_age_matrix():
+def output_text_matrix_from_vector():
     from pymongo import Connection
     users=Connection().user_profilling.users
     word_vectors=get_vectors('/mnt/data1/adoni/word_vectors.bin')
@@ -162,6 +200,7 @@ def output_age_matrix():
     total_count=20000
     bar=get_progressive_bar(total_count)
     finish_count=0
+    uids=[]
     for user in users.find():
         correct_status=0
         for status in user['statuses']:
@@ -189,70 +228,15 @@ def output_age_matrix():
         else:
             all_data_y.append(0)
         all_data_x.append(text_vector)
+        uids.append(user['information']['uid'])
         index+=1
         finish_count+=1
         bar.cursor.restore()
         bar.draw(value=finish_count)
     all_data_x=numpy.array(all_data_x)
-    b=numpy.max(all_data_x,axis=0)
-    c=numpy.min(all_data_x,axis=0)
-    pickle.dump((b,c),open('./normal','wb'))
-    for i in all_data_x.shape[1]:
-        all_data_x[:,i]=(all_data_x[:,i]-c[i])/(b[i]-c[i])
     all_data_y=numpy.array(all_data_y)
-    train_set_x=all_data_x[0:index*3/4]
-    train_set_y=all_data_y[0:index*3/4]
-    train_set=(train_set_x,train_set_y)
-    valid_set_x=all_data_x[index*3/4:index*7/8]
-    valid_set_y=all_data_y[index*3/4:index*7/8]
-    valid_set=(valid_set_x,valid_set_y)
-    test_set_x=all_data_x[index*7/8:]
-    test_set_y=all_data_y[index*7/8:]
-    test_set=(test_set_x,test_set_y)
-    pickle.dump((train_set,valid_set,test_set),open('/mnt/data1/adoni/gender_matrix_word_vector.data','wb'))
-
-def get_str_description(description):
-    d=[]
-    for dd in description:
-        #d=d+dd
-        d.append(''.join(dd))
-    d=' '.join(d)
-    return d
-
-def dump_train_valid_test(x,y,file_name):
-    print 'dump'
-    if not len(x)==len(y):
-        raise Exception('The size of x is not equel with that of y')
-    all_data_x=[]
-    all_data_y=[]
-    for i in range(0,len(x)):
-        if numpy.any(x[i]):
-            all_data_x.append(x[i])
-            all_data_y.append(y[i])
-    if not len(all_data_x)==len(all_data_y):
-        raise Exception('The size of x is not equel with that of y')
-    all_data_x=numpy.array(all_data_x)
-    all_data_y=numpy.array(all_data_y)
-    b=numpy.max(all_data_x,axis=0)
-    c=numpy.min(all_data_x,axis=0)
-    pickle.dump((b,c),open('./normal','wb'))
-    for i in range(0,all_data_x.shape[1]):
-        if b[i]==c[i]:
-            all_data_x[i]=0
-        else:
-            all_data_x[:,i]=(all_data_x[:,i]-c[i])/(b[i]-c[i])
-    index=len(all_data_y)
-    print index
-    train_set_x=all_data_x[0:index*3/4]
-    train_set_y=all_data_y[0:index*3/4]
-    train_set=(train_set_x,train_set_y)
-    valid_set_x=all_data_x[index*3/4:index*7/8]
-    valid_set_y=all_data_y[index*3/4:index*7/8]
-    valid_set=(valid_set_x,valid_set_y)
-    test_set_x=all_data_x[index*7/8:]
-    test_set_y=all_data_y[index*7/8:]
-    test_set=(test_set_x,test_set_y)
-    pickle.dump((train_set,valid_set,test_set),open('/mnt/data1/adoni/'+file_name,'wb'))
+    dump_train_valid_test(all_data_x,all_data_y,'gender_text_vector.data')
+    dump_user_vector(all_data_x,all_data_y,uids,'user_text_vectors.data')
 
 def output_description_matrix():
     from sklearn.feature_extraction.text import CountVectorizer
@@ -317,7 +301,6 @@ def output_name_matrix():
     all_data_y=numpy.array(y)
     dump_train_valid_test(all_data_x,all_data_y,'gender_name.data')
 
-
 def output_name_matrix_of_two_words():
     from helper import get_progressive_bar
     from pymongo import Connection
@@ -360,6 +343,7 @@ def output_graph_matrix():
     x=[]
     y=[]
     finish_count=0
+    uids=[]
     for user in users.find({'int_id':{'$exists':True}},{'information':1,'int_id':1}):
         finish_count+=1
         print finish_count
@@ -375,13 +359,11 @@ def output_graph_matrix():
         else:
             y.append(1)
         x.append(user_embedding['embedding'])
-    dump_train_valid_test(x,y,'gender_graph.data')
+        uids.append(user['information']['uid'])
+    #dump_train_valid_test(x,y,'gender_graph.data')
+    dump_user_vector(x,y,uids,'user_graph_vector.data')
 
 if __name__=='__main__':
     print '=================Helper================='
-    #output_age_matrix_from_bag_of_words()
-    #output_age_matrix()
-    #output_description_matrix()
-    #output_name_matrix()
-    #output_name_matrix_of_two_words()
-    output_graph_matrix()
+    #output_graph_matrix()
+    output_text_matrix_from_vector()
